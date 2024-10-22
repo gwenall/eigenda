@@ -766,15 +766,25 @@ func (t *Transactor) GetRequiredQuorumNumbers(ctx context.Context, blockNumber u
 }
 
 func (t *Transactor) GetActiveReservations(ctx context.Context, accountIDs []string) (map[string]core.ActiveReservation, error) {
-	reservations := make(map[string]core.ActiveReservation)
-	for _, accountID := range accountIDs {
-		reservation, err := t.GetActiveReservationByAccount(ctx, accountID)
-		if err != nil {
-			return nil, err
-		}
-		reservations[accountID] = reservation
+	// map accountIDs to addresses
+	accountAddresses := make([]gethcommon.Address, len(accountIDs))
+	for i, accountID := range accountIDs {
+		accountAddresses[i] = gethcommon.HexToAddress(accountID)
 	}
-	return reservations, nil
+
+	reservations_map := make(map[string]core.ActiveReservation)
+	reservations, err := t.Bindings.PaymentVault.GetReservations(&bind.CallOpts{
+		Context: ctx,
+	}, accountAddresses)
+	if err != nil {
+		return nil, err
+	}
+
+	// since reservations are returned in the same order as the accountIDs, we can directly map them
+	for i, reservation := range reservations {
+		reservations_map[accountIDs[i]] = reservation
+	}
+	return reservations_map, nil
 }
 
 func (t *Transactor) GetActiveReservationByAccount(ctx context.Context, accountID string) (core.ActiveReservation, error) {
@@ -788,15 +798,26 @@ func (t *Transactor) GetActiveReservationByAccount(ctx context.Context, accountI
 }
 
 func (t *Transactor) GetOnDemandPayments(ctx context.Context, accountIDs []string) (map[string]core.OnDemandPayment, error) {
-	payments := make(map[string]core.OnDemandPayment)
-	for _, accountID := range accountIDs {
-		payment, err := t.GetOnDemandPaymentByAccount(ctx, accountID)
-		if err != nil {
-			return nil, err
-		}
-		payments[accountID] = payment
+	// map accountIDs to addresses
+	accountAddresses := make([]gethcommon.Address, len(accountIDs))
+	for i, accountID := range accountIDs {
+		accountAddresses[i] = gethcommon.HexToAddress(accountID)
 	}
-	return payments, nil
+	payments_map := make(map[string]core.OnDemandPayment)
+	payments, err := t.Bindings.PaymentVault.GetOnDemandAmounts(&bind.CallOpts{
+		Context: ctx,
+	}, accountAddresses)
+	if err != nil {
+		return nil, err
+	}
+
+	// since payments are returned in the same order as the accountIDs, we can directly map them
+	for i, payment := range payments {
+		payments_map[accountIDs[i]] = core.OnDemandPayment{
+			CumulativePayment: payment,
+		}
+	}
+	return payments_map, nil
 }
 
 func (t *Transactor) GetOnDemandPaymentByAccount(ctx context.Context, accountID string) (core.OnDemandPayment, error) {
