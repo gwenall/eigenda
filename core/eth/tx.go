@@ -765,10 +765,10 @@ func (t *Transactor) GetRequiredQuorumNumbers(ctx context.Context, blockNumber u
 	return requiredQuorums, nil
 }
 
-func (t *Transactor) GetActiveReservations(ctx context.Context, blockNumber uint32, accountIDs []string) (map[string]core.ActiveReservation, error) {
+func (t *Transactor) GetActiveReservations(ctx context.Context, accountIDs []string) (map[string]core.ActiveReservation, error) {
 	reservations := make(map[string]core.ActiveReservation)
 	for _, accountID := range accountIDs {
-		reservation, err := t.GetActiveReservationByAccount(ctx, blockNumber, accountID)
+		reservation, err := t.GetActiveReservationByAccount(ctx, accountID)
 		if err != nil {
 			return nil, err
 		}
@@ -777,7 +777,7 @@ func (t *Transactor) GetActiveReservations(ctx context.Context, blockNumber uint
 	return reservations, nil
 }
 
-func (t *Transactor) GetActiveReservationByAccount(ctx context.Context, blockNumber uint32, accountID string) (core.ActiveReservation, error) {
+func (t *Transactor) GetActiveReservationByAccount(ctx context.Context, accountID string) (core.ActiveReservation, error) {
 	reservation, err := t.Bindings.PaymentVault.GetReservation(&bind.CallOpts{
 		Context: ctx,
 	}, gethcommon.HexToAddress(accountID))
@@ -787,10 +787,10 @@ func (t *Transactor) GetActiveReservationByAccount(ctx context.Context, blockNum
 	return reservation, nil
 }
 
-func (t *Transactor) GetOnDemandPayments(ctx context.Context, blockNumber uint32, accountIDs []string) (map[string]core.OnDemandPayment, error) {
+func (t *Transactor) GetOnDemandPayments(ctx context.Context, accountIDs []string) (map[string]core.OnDemandPayment, error) {
 	payments := make(map[string]core.OnDemandPayment)
 	for _, accountID := range accountIDs {
-		payment, err := t.GetOnDemandPaymentByAccount(ctx, blockNumber, accountID)
+		payment, err := t.GetOnDemandPaymentByAccount(ctx, accountID)
 		if err != nil {
 			return nil, err
 		}
@@ -799,7 +799,7 @@ func (t *Transactor) GetOnDemandPayments(ctx context.Context, blockNumber uint32
 	return payments, nil
 }
 
-func (t *Transactor) GetOnDemandPaymentByAccount(ctx context.Context, blockNumber uint32, accountID string) (core.OnDemandPayment, error) {
+func (t *Transactor) GetOnDemandPaymentByAccount(ctx context.Context, accountID string) (core.OnDemandPayment, error) {
 	onDemandPayment, err := t.Bindings.PaymentVault.GetOnDemandAmount(&bind.CallOpts{
 		Context: ctx,
 	}, gethcommon.HexToAddress(accountID))
