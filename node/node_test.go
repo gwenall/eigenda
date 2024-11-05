@@ -2,6 +2,7 @@ package node_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -88,6 +89,8 @@ func newComponents(t *testing.T) *components {
 func TestNodeStartNoAddress(t *testing.T) {
 	c := newComponents(t)
 	c.node.Config.RegisterNodeAtStart = false
+
+	c.tx.On("GetOperatorSocket", mock.Anything).Return("", errors.New("failed to get operator socket"))
 
 	err := c.node.Start(context.Background())
 	assert.NoError(t, err)
